@@ -4,6 +4,7 @@ interface IUser extends Document {
   name: string;
   email: string;
   password: string;
+  isAdmin: false;
   isVerified: boolean;
   profilePicture: string;
   verificationOTP: string | null;
@@ -16,6 +17,7 @@ const UserSchema: Schema = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  isAdmin: {type: String, required: true, default: false},
   isVerified: { type: Boolean, default: false },
   verificationOTP: { type: String, default: null },
   verificationExpires: { type: Date, default: null },
