@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IReview extends Document {
-  userId: string;
-  foodId: string;
+  userId: mongoose.Schema.Types.ObjectId;
+  foodId: mongoose.Schema.Types.ObjectId;
   rating: number; // Rating out of 5
   comment: string;
   createdAt: Date;

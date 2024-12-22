@@ -39,15 +39,17 @@ export const getSingleFoodWithReviews = async (
   try {
     const { id } = req.params;
 
+    // Find the food by ID
     const food = await Food.findById(id);
     if (!food) {
       res.status(404).json({ message: "Food not found" });
       return;
     }
 
+    // Find and populate reviews
     const reviews = await Review.find({ foodId: id }).populate(
-      "userId",
-      "name email"
+      "userId", // Populate user details
+      "name profilePicture"
     );
 
     res.status(200).json({ success: true, food, reviews });
