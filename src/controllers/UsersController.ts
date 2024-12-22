@@ -222,3 +222,72 @@ export const uploadProfilePicture = async (
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+export const getAllUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { search } = req.query;
+
+    const query: any = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const users = await User.find(query, "-password"); // Exclude password field
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+export const getUserDetails = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id, "-password"); // Exclude password field
+    if (!user) {
+      res.status(404).json({ success: false, message: "User not found" });
+      return;
+    }
+
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+export const editUserName = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    if (!name) {
+      res.status(400).json({ success: false, message: "Name is required" });
+      return;
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      res.status(404).json({ success: false, message: "User not found" });
+      return;
+    }
+
+    user.name = name;
+    await user.save();
+
+    res.status(200).json({ success: true, message: "User name updated", user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
