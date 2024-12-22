@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Order from "../models/OrdersModel";
 import { Types } from "mongoose";
+import Food from "../models/FoodsModel";
 
 // Admin: Get all orders with search and filter
 export const getAllOrders = async (
@@ -102,6 +103,64 @@ export const editOrderStatus = async (
     res
       .status(200)
       .json({ success: true, message: "Order status updated", order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+export const placeOrder = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    const { items } = req.body;
+
+    if (!userId) {
+      res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: User not logged in" });
+      return;
+    }
+
+    if (!items || items.length === 0) {
+      res
+        .status(400)
+        .json({ success: false, message: "No items in the order" });
+      return;
+    }
+
+    // Calculate total price and validate items
+    let totalPrice = 0;
+    for (const item of items) {
+      const food = await Food.findById(item.foodId);
+      if (!food) {
+        res
+          .status(404)
+          .json({
+            success: false,
+            message: `Food item not found: ${item.foodId}`,
+          });
+        return;
+      }
+      totalPrice += food.price * item.quantity;
+    }
+
+    // Create a new order
+    const order = new Order({
+      userId,
+      items,
+      totalPrice,
+      status: "Pending",
+    });
+
+    await order.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Order placed successfully",
+      order,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error", error });
   }

@@ -6,6 +6,7 @@ import {
   deleteFood,
   addFood,
   editFood,
+  updateFoodAvailability,
 } from "../controllers/FoodsController";
 import { checkAdmin } from "../middlewares/checkAdmin";
 import { authenticateUser } from "../middlewares/authorization";
@@ -20,5 +21,12 @@ router.get("/:id", authenticateUser, getSingleFoodWithReviews);
 router.delete("/:id", authenticateUser, checkAdmin, deleteFood);
 router.post("/", authenticateUser, checkAdmin, addFood);
 router.put("/:id", authenticateUser, checkAdmin, editFood);
+
+router.put(
+  "/foods/:id/availability",
+  authenticateUser,
+  checkAdmin,
+  updateFoodAvailability
+);
 
 export default router;

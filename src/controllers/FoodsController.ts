@@ -113,3 +113,43 @@ export const editFood = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+export const updateFoodAvailability = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { available } = req.body;
+
+    if (typeof available !== "boolean") {
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Invalid availability status. Must be true or false.",
+        });
+      return;
+    }
+
+    const food = await Food.findById(id);
+
+    if (!food) {
+      res.status(404).json({ success: false, message: "Food item not found." });
+      return;
+    }
+
+    food.available = available;
+    await food.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Food availability updated to ${
+        available ? "available" : "unavailable"
+      }`,
+      food,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
