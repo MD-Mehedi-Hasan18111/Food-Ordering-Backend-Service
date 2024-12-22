@@ -66,8 +66,8 @@ export const sendVerificationOTP = async (
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
-        user: 'mdmehedihasan18111@gmail.com',
-        pass: 'ttjy oszp ctbj nzup',
+        user: "mdmehedihasan18111@gmail.com",
+        pass: "ttjy oszp ctbj nzup",
       },
     });
 
@@ -182,6 +182,39 @@ export const resetPasswordWithOTP = async (
     await user.save();
 
     res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const uploadProfilePicture = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { email, imageUrl } = req.body;
+
+    // Validate input
+    if (!email || !imageUrl) {
+      res.status(400).json({ message: "Email and imageUrl are required" });
+      return;
+    }
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Update the user's profile picture
+    user.profilePicture = imageUrl;
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile picture updated successfully",
+      profilePicture: user.profilePicture,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
