@@ -22,7 +22,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean(); // Convert Mongoose document to plain JS object
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
@@ -35,10 +35,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "", {
-      expiresIn: "1h",
+      expiresIn: "7d",
     });
 
-    res.json({ token, user });
+    // Remove password before sending the response
+    const { password: _, ...userWithoutPassword } = user;
+
+    res.json({ token, user: userWithoutPassword });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
@@ -137,8 +140,8 @@ export const sendForgotPasswordOTP = async (
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: "mdmehedihasan18111@gmail.com",
+        pass: "ttjy oszp ctbj nzup",
       },
     });
 

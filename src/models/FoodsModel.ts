@@ -6,7 +6,6 @@ export interface IFood extends Document {
   price: number;
   description: string;
   image: string;
-  reviews: { user: string; comment: string; rating: number }[];
 }
 
 const FoodSchema = new Schema<IFood>({
@@ -15,13 +14,6 @@ const FoodSchema = new Schema<IFood>({
   price: { type: Number, required: true },
   description: { type: String, required: true },
   image: { type: String, required: true },
-  reviews: [
-    {
-      user: { type: String, required: true },
-      comment: { type: String, required: true },
-      rating: { type: Number, required: true },
-    },
-  ],
 });
 
 export default mongoose.model<IFood>("Food", FoodSchema);

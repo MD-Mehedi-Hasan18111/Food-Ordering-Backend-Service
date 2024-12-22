@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Food from "../models/FoodsModel";
+import Review from "../models/ReviewModel";
 
 export const getAllCategories = async (
   req: Request,
@@ -31,7 +32,7 @@ export const getAllFoods = async (
   }
 };
 
-export const getFoodWithReviews = async (
+export const getSingleFoodWithReviews = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -44,9 +45,14 @@ export const getFoodWithReviews = async (
       return;
     }
 
-    res.status(200).json({ food });
+    const reviews = await Review.find({ foodId: id }).populate(
+      "userId",
+      "name email"
+    );
+
+    res.status(200).json({ success: true, food, reviews });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    res.status(500).json({ success: false, message: "Server error", error });
   }
 };
 
