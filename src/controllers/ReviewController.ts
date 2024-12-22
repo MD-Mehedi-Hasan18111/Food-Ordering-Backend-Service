@@ -6,7 +6,7 @@ import Food from "../models/FoodsModel";
 export const addReview = async (req: Request, res: Response): Promise<void> => {
   try {
     const { foodId, rating, comment } = req.body;
-    const userId = req.user?.id;
+    const { userId } = req.params;
 
     if (!userId) {
       res.status(401).json({ message: "Unauthorized: User not logged in" });
@@ -38,7 +38,10 @@ export const getReviewsForFood = async (
   try {
     const { foodId } = req.params;
 
-    const reviews = await Review.find({ foodId }).populate("userId", "name email");
+    const reviews = await Review.find({ foodId }).populate(
+      "userId",
+      "name email"
+    );
     res.status(200).json({ success: true, reviews });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error", error });
@@ -51,8 +54,7 @@ export const deleteReview = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
-    const userId = req.user?.id;
+    const { userId, id } = req.params;
 
     // Find the review
     const review = await Review.findById(id);
@@ -61,9 +63,11 @@ export const deleteReview = async (
       return;
     }
 
-    // Only allow the owner or an admin to delete
-    if (review.userId.toString() !== userId && !req.user?.isAdmin) {
-      res.status(403).json({ message: "Forbidden: Not authorized to delete this review" });
+    // Only allow the user to delete own review
+    if (review.userId.toString() !== userId) {
+      res
+        .status(403)
+        .json({ message: "Forbidden: Not authorized to delete this review" });
       return;
     }
 

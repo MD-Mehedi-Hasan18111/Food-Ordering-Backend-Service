@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 import User from "../models/UsersModel";
 
 export const checkAdmin = async (
@@ -7,21 +8,33 @@ export const checkAdmin = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = req.user?.id; // Assuming `req.user` contains the authenticated user's ID
+    // Get token from headers
+    const token = req.headers.authorization?.split(" ")[1];
 
-    if (!userId) {
-      res.status(401).json({ message: "Unauthorized: User not logged in" });
+    if (!token) {
+      res.status(401).json({ message: "Unauthorized: Token not provided" });
       return;
     }
 
-    const user = await User.findById(userId);
+    // Decode token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      id: string;
+    };
 
-    if (!user || !user.isAdmin) {
-      // Assuming 'role' exists on your User model
+    // Fetch user from database
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      res.status(401).json({ message: "Unauthorized: User not found" });
+      return;
+    }
+
+    if (!user.isAdmin) {
       res.status(403).json({ message: "Forbidden: Admins only" });
       return;
     }
 
+    // Proceed to the next middleware
     next();
   } catch (error) {
     res.status(500).json({ message: "Server error", error });

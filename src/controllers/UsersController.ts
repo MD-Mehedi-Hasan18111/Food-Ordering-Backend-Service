@@ -34,9 +34,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "", {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET || "",
+      {
+        expiresIn: "7d",
+      }
+    );
 
     // Remove password before sending the response
     const { password: _, ...userWithoutPassword } = user;

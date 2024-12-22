@@ -28,7 +28,7 @@ export const getMyOrders = async (
   res: Response
 ): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const { userId } = req.params;
 
     if (!userId) {
       res.status(401).json({ message: "Unauthorized: User not logged in" });
@@ -47,13 +47,13 @@ export const getMyOrders = async (
   }
 };
 
-// User: Get single order track status
-export const getOrderStatus = async (
+// User: Get single order
+export const getSingleOrder = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { userId, id } = req.params;
 
     if (!Types.ObjectId.isValid(id)) {
       res.status(400).json({ message: "Invalid order ID" });
@@ -66,7 +66,7 @@ export const getOrderStatus = async (
       return;
     }
 
-    if (order.userId !== req.user?.id) {
+    if (order.userId !== userId) {
       res.status(403).json({ message: "Forbidden: Not your order" });
       return;
     }
@@ -113,7 +113,7 @@ export const placeOrder = async (
   res: Response
 ): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const { userId } = req.params;
     const { items } = req.body;
 
     if (!userId) {
@@ -135,12 +135,10 @@ export const placeOrder = async (
     for (const item of items) {
       const food = await Food.findById(item.foodId);
       if (!food) {
-        res
-          .status(404)
-          .json({
-            success: false,
-            message: `Food item not found: ${item.foodId}`,
-          });
+        res.status(404).json({
+          success: false,
+          message: `Food item not found: ${item.foodId}`,
+        });
         return;
       }
       totalPrice += food.price * item.quantity;
