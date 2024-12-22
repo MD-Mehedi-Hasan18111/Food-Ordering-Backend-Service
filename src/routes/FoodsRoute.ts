@@ -23,7 +23,7 @@ router.post("/", authenticateUser, checkAdmin, addFood);
 router.put("/:id", authenticateUser, checkAdmin, editFood);
 
 router.put(
-  "/foods/:id/availability",
+  "/:id/availability",
   authenticateUser,
   checkAdmin,
   updateFoodAvailability
